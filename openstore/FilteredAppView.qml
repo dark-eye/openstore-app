@@ -38,6 +38,7 @@ ScrollView {
 
     ListView {
         id: view
+        pressDelay: 66
 
         // WORKAROUND: Fix for wrong grid unit size
         Component.onCompleted: root.flickable_responsive_scroll_fix(view)
@@ -65,12 +66,60 @@ ScrollView {
 
         delegate: ListItem {
             height: layout.height + divider.height
+            leadingActions:ListItemActions {
+                actions: [
+                    Action {
+                        id: deleteLeadingAction
+                        iconName: "delete"
+                        text: i18n.tr("Remove")
+                        enabled: model.installed
+                        visible: model.installed
+                        onTriggered: Qt.openUrlExternally("appid://" + app.appId + "/" + hookName + "/" + app.installedVersion)
 
+                    }
+                ]
+            }
+            trailingActions:ListItemActions {
+                actions: [
+                    Action {
+                        id: installrailingAction
+                        iconName: "import"
+                        text: i18n.tr("Install")
+                        enabled: !model.installed && !appModel.installer.busy
+                        visible: !model.installed
+                        onTriggered: appModel.installer.installPackage(model.packageUrl)
+
+                    },
+                    Action {
+                        id: openTrailingAction
+                        iconName: "document-open"
+                        text: i18n.tr("Open")
+                        enabled: model.installed
+                        visible: model.installed && model.hooks.contains(ApplicationItem.HookDesktop)
+                        onTriggered: {
+                            var hookName = model.hookName(model.hooks.indexOf(ApplicationItem.HookDesktop));
+                            Qt.openUrlExternally("appid://" + model.appId + "/" + hookName + "/" + model.installedVersion)
+                        }
+
+                    },
+                    Action {
+                        id: infoTrailingAction
+                        iconName: "info"
+                        text: i18n.tr("info")
+                        enabled: true
+                        visible: true
+                        onTriggered: {
+                            rootItem.appDetailsRequired(model.appId)
+                        }
+                    }
+                ]
+            }
             ListItemLayout {
                 id: layout
                 title.text: model.name
                 summary.text: model.tagline
                 summary.wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+
 
                 UbuntuShape {
                     SlotsLayout.position: SlotsLayout.Leading
