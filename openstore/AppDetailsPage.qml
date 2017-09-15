@@ -30,6 +30,7 @@ Page {
     }
 
     property var app: null
+    property bool canBeOpened: false
 
 
     ScrollView {
@@ -101,6 +102,14 @@ Page {
                                 appModel.installer.removePackage(app.appId, app.installedVersion)
                             })
                         }
+                    }
+
+                    Button {
+                        anchors { right: parent.right }
+                        text: "Open"
+                        color: UbuntuColors.green
+                        visible: app.installed && appDetailsPage.canBeOpened
+                        onClicked: Qt.openUrlExternally("appid://" + app.appId + "/" + hookName + "/" + app.installedVersion)
                     }
                 }
 
@@ -404,6 +413,8 @@ Page {
                     property string hookName: app.hookName(index)
                     property string apparmorTemplate: app.apparmorTemplate(index)
 
+                    Component.onCompleted: appDetailsPage.canBeOpened |= (hooks & ApplicationItem.HookDesktop);
+
                     Column {
                         id: hookDelLayout
                         anchors { left: parent.left; right: parent.right; margins: units.gu(2) }
@@ -556,13 +567,7 @@ Page {
                             subtitle.wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         }
 
-                        Button {
-                            anchors { right: parent.right }
-                            text: "Open"
-                            color: UbuntuColors.green
-                            visible: app.installed &&  (hooks & ApplicationItem.HookDesktop)
-                            onClicked: Qt.openUrlExternally("appid://" + app.appId + "/" + hookName + "/" + app.installedVersion)
-                        }
+
                     }
                 }
             }
